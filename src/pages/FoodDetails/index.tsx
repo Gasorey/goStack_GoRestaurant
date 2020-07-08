@@ -74,6 +74,17 @@ const FoodDetails: React.FC = () => {
   useEffect(() => {
     async function loadFood(): Promise<void> {
       // Load a specific food with extras based on routeParams id
+      const { data: responseFood } = await api.get<Food>(
+        `foods/${routeParams.id}`,
+      );
+      const extraWithQuantity = responseFood.extras.map(extra => ({
+        ...extra,
+        quantity: 0,
+      }));
+
+      setExtras(extraWithQuantity);
+
+      setFood(responseFood);
     }
 
     loadFood();
@@ -81,30 +92,63 @@ const FoodDetails: React.FC = () => {
 
   function handleIncrementExtra(id: number): void {
     // Increment extra quantity
+    const getExtras = extras.map(extra => {
+      if (extra.id === id) {
+        const getExtra = { ...extra };
+
+        getExtra.quantity += 1;
+        return getExtra;
+      }
+      return extra;
+    });
+
+    setExtras(getExtras);
   }
 
   function handleDecrementExtra(id: number): void {
-    // Decrement extra quantity
+    const getExtras = extras.map(extra => {
+      if (extra.id === id) {
+        const getExtra = { ...extra };
+
+        getExtra.quantity -= 1;
+        return getExtra;
+      }
+      return extra;
+    });
+    setExtras(getExtras);
   }
 
   function handleIncrementFood(): void {
     // Increment food quantity
+
+    setFoodQuantity(foodQuantity + 1);
   }
 
   function handleDecrementFood(): void {
     // Decrement food quantity
+    setFoodQuantity(foodQuantity - 1);
   }
 
   const toggleFavorite = useCallback(() => {
     // Toggle if food is favorite or not
+    setIsFavorite(!isFavorite);
   }, [isFavorite, food]);
 
   const cartTotal = useMemo(() => {
     // Calculate cartTotal
+    return formatValue(
+      food.price * foodQuantity +
+        extras.reduce(
+          (totalExtras, extra) => totalExtras + extra.quantity * extra.value,
+          0.0,
+        ),
+    );
   }, [extras, food, foodQuantity]);
 
   async function handleFinishOrder(): Promise<void> {
     // Finish the order and save on the API
+
+    navigation.navigate('Home');
   }
 
   // Calculate the correct icon name
